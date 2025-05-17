@@ -1,14 +1,46 @@
-// Update this page (the content is just a fallback if you fail to update the page)
 
-const Index = () => {
+import { AppProvider } from "@/contexts/AppContext";
+import { BottomNav } from "@/components/BottomNav";
+import { HomePage } from "@/pages/HomePage";
+import { LearnPage } from "@/pages/LearnPage";
+import { FriendsPage } from "@/pages/FriendsPage";
+import { ProgressPage } from "@/pages/ProgressPage";
+import { ProfilePage } from "@/pages/ProfilePage";
+import { useAppContext } from "@/contexts/AppContext";
+
+// Main content component that renders the active tab
+const MainContent = () => {
+  const { state } = useAppContext();
+  
+  switch (state.activeTab) {
+    case "home":
+      return <HomePage />;
+    case "learn":
+      return <LearnPage />;
+    case "friends":
+      return <FriendsPage />;
+    case "progress":
+      return <ProgressPage />;
+    case "profile":
+      return <ProfilePage />;
+    default:
+      return <HomePage />;
+  }
+};
+
+// App container with context
+const SpeechLingo = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <AppProvider>
+      <div className="min-h-screen bg-background pb-16">
+        <MainContent />
+        <BottomNav />
       </div>
-    </div>
+    </AppProvider>
   );
 };
+
+// Export the main component
+const Index = () => <SpeechLingo />;
 
 export default Index;

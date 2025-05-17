@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,13 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				lingo: {
+					blue: '#58cced',
+					green: '#78d56c',
+					darkBlue: '#3a86ff',
+					orange: '#ff9e00',
+					red: '#ff5154',
 				}
 			},
 			borderRadius: {
@@ -84,11 +92,42 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+				'pulse-recording': {
+					'0%, 100%': { 
+						opacity: '1',
+						transform: 'scale(1)'
+					},
+					'50%': { 
+						opacity: '0.8',
+						transform: 'scale(1.05)' 
+					},
+				},
+				'wave': {
+					'0%': { transform: 'scaleY(0.2)' },
+					'50%': { transform: 'scaleY(1)' },
+					'100%': { transform: 'scaleY(0.2)' },
+				},
+				'fade-in': {
+					'0%': { opacity: '0', transform: 'translateY(10px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' },
+				},
+				'scale-up': {
+					'0%': { transform: 'scale(0.95)', opacity: '0' },
+					'100%': { transform: 'scale(1)', opacity: '1' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-recording': 'pulse-recording 2s infinite',
+				'wave-1': 'wave 1.2s infinite ease-in-out',
+				'wave-2': 'wave 1.2s infinite ease-in-out -0.2s',
+				'wave-3': 'wave 1.2s infinite ease-in-out -0.4s',
+				'wave-4': 'wave 1.2s infinite ease-in-out -0.6s',
+				'wave-5': 'wave 1.2s infinite ease-in-out -0.8s',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'scale-up': 'scale-up 0.3s ease-out',
 			}
 		}
 	},
