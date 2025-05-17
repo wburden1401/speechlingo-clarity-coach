@@ -9,6 +9,7 @@ export function DailyGoal() {
   const minutesCompleted = 6;
   const dailyGoalMinutes = user.dailyGoalMinutes;
   const percentComplete = Math.min(100, Math.round((minutesCompleted / dailyGoalMinutes) * 100));
+  const isGoalReached = minutesCompleted >= dailyGoalMinutes;
   
   return (
     <div className="bg-card rounded-xl p-4 shadow-sm border border-border">
@@ -31,14 +32,20 @@ export function DailyGoal() {
         </div>
         
         <div className="flex-1">
-          <p className="text-sm">
-            <span className="font-medium">{dailyGoalMinutes - minutesCompleted} minutes</span> left to reach your daily goal
-          </p>
+          {isGoalReached ? (
+            <p className="text-sm font-medium text-lingo-green">
+              Awesome! You've reached your daily goal! 🎉
+            </p>
+          ) : (
+            <p className="text-sm">
+              <span className="font-medium">{dailyGoalMinutes - minutesCompleted} minutes</span> left to reach your daily goal
+            </p>
+          )}
           <div className="w-full bg-muted h-2 rounded-full mt-2">
             <div 
               className={cn(
-                "h-2 rounded-full bg-primary transition-all duration-500",
-                percentComplete >= 100 ? "bg-lingo-green" : "bg-primary"
+                "h-2 rounded-full transition-all duration-500",
+                isGoalReached ? "bg-lingo-green" : "bg-primary"
               )} 
               style={{ width: `${percentComplete}%` }}
             />
