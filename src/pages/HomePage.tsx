@@ -16,15 +16,15 @@ export function HomePage() {
       </div>
       
       <div className="px-4">
+        <QuoteCard />
+      </div>
+      
+      <div className="px-4">
         <QuickLessonButton />
       </div>
 
       <div className="px-4">
         <DailyGoal />
-      </div>
-      
-      <div className="px-4">
-        <QuoteCard />
       </div>
     </div>
   );
