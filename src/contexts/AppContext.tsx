@@ -119,10 +119,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const stopRecording = () => {
-    setState((prev) => ({
-      ...prev,
+    setState((currentState) => ({
+      ...currentState,
       recordingState: {
-        ...prev.recordingState,
+        ...currentState.recordingState,
         isRecording: false,
       },
       isLoading: true,
@@ -137,8 +137,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         xp: Math.floor(Math.random() * 10) + 8, // 8-17
       };
 
-      setState((prev) => ({
-        ...prev,
+      setState((currentState) => ({
+        ...currentState,
         feedbackResult: mockFeedback,
         isLoading: false,
       }));
@@ -146,7 +146,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Update user XP
       updateUser({
         xp: user.xp + mockFeedback.xp,
-        totalLearningTime: user.totalLearningTime + Math.ceil(prev.recordingState.duration / 60),
+        totalLearningTime: user.totalLearningTime + Math.ceil(currentState.recordingState.duration / 60),
       });
     }, 2000);
   };
