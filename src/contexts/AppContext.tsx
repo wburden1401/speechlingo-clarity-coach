@@ -137,6 +137,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         xp: Math.floor(Math.random() * 10) + 8, // 8-17
       };
 
+      // Store the current state to access for updating user
+      const updatedState = { ...state };
+
       setState((currentState) => ({
         ...currentState,
         feedbackResult: mockFeedback,
@@ -146,7 +149,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Update user XP
       updateUser({
         xp: user.xp + mockFeedback.xp,
-        totalLearningTime: user.totalLearningTime + Math.ceil(currentState.recordingState.duration / 60),
+        totalLearningTime: user.totalLearningTime + Math.ceil(updatedState.recordingState.duration / 60),
       });
     }, 2000);
   };
