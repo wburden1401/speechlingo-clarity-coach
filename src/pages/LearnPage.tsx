@@ -22,7 +22,7 @@ export function LearnPage() {
           </p>
         </div>
 
-        <div className="px-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="px-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {categories.map((category) => {
             const isLocked = category.requiredLevel > user.level;
             
@@ -39,12 +39,12 @@ export function LearnPage() {
                   }
                 }}
               >
-                <div className="category-image" style={{ backgroundColor: `var(--${category.color})` }}>
-                  <div className="flex items-center justify-center h-full text-4xl">
+                <div className="category-image h-28" style={{ backgroundColor: `var(--${category.color})` }}>
+                  <div className="flex items-center justify-center h-full text-3xl">
                     {category.icon}
                   </div>
                 </div>
-                <div className="p-4">
+                <div className="p-3">
                   <div className="flex justify-between items-center">
                     <h2 className="font-semibold">{category.name}</h2>
                     {isLocked && (

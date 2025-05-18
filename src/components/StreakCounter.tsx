@@ -10,9 +10,9 @@ export function StreakCounter() {
   return (
     <div className={cn(
       "streak-counter",
-      "flex items-center gap-1.5 bg-lingo-orange/10 text-lingo-orange rounded-full px-3 py-1.5 text-sm font-medium transition-all"
+      "flex items-center gap-2 bg-lingo-orange/10 text-lingo-orange rounded-full px-4 py-2 text-base font-medium transition-all"
     )}>
-      <Flame className="h-4 w-4 text-lingo-orange animate-pulse" />
+      <Flame className="h-5 w-5 text-lingo-orange animate-pulse" />
       <span>{user.streak} day streak</span>
     </div>
   );
