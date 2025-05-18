@@ -3,6 +3,14 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { AppState, Category, Lesson, FeedbackResult, User } from "@/types";
 import { mockUser, mockCategories } from "@/lib/data";
 import { useToast } from "@/components/ui/use-toast";
+import { 
+  saveUserData, 
+  loadUserData, 
+  updateStreak, 
+  saveCompletedLesson,
+  getCompletedLessons
+} from "@/lib/localStorage";
+import { AudioAnalysisResult } from "@/lib/audioRecorder";
 
 interface AppContextProps {
   state: AppState;
@@ -18,6 +26,8 @@ interface AppContextProps {
   setFeedbackResult: (result: FeedbackResult | null) => void;
   getRandomLesson: () => { category: Category; lesson: Lesson } | null;
   updateUser: (updates: Partial<User>) => void;
+  markLessonComplete: (categoryId: string, lessonId: string) => void;
+  audioAnalysisResult: AudioAnalysisResult | null;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -34,6 +44,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const { toast } = useToast();
   const [user, setUser] = useState<User>(mockUser);
   const [categories, setCategories] = useState<Category[]>(mockCategories);
+  const [audioAnalysisResult, setAudioAnalysisResult] = useState<AudioAnalysisResult | null>(null);
   const [state, setState] = useState<AppState>({
     activeTab: "home",
     selectedCategory: null,
@@ -49,10 +60,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isLoading: false,
   });
 
-  // Initialize permissions check
+  // Initialize state from local storage
   useEffect(() => {
+    const storedUser = loadUserData();
+    if (storedUser) {
+      // Update streak based on last login
+      const userWithUpdatedStreak = updateStreak(storedUser);
+      setUser(userWithUpdatedStreak);
+    } else {
+      // First time user - save mock data to local storage
+      saveUserData(mockUser);
+    }
+    
+    // Mark completed lessons from local storage
+    const completedLessons = getCompletedLessons();
+    if (Object.keys(completedLessons).length > 0) {
+      const updatedCategories = categories.map(category => {
+        if (completedLessons[category.id]) {
+          const updatedLessons = category.lessons.map(lesson => ({
+            ...lesson,
+            isCompleted: completedLessons[category.id].includes(lesson.id)
+          }));
+          return { ...category, lessons: updatedLessons };
+        }
+        return category;
+      });
+      
+      setCategories(updatedCategories);
+    }
+    
     checkMicrophonePermission();
   }, []);
+
+  // Save user data when it changes
+  useEffect(() => {
+    saveUserData(user);
+  }, [user]);
 
   // Check for microphone permission
   const checkMicrophonePermission = async () => {
@@ -64,7 +107,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }));
       
       // Clean up
-      stream.getTracks().forEach((track) => track.stop());
+      stream.getTracks().forEach(track => track.stop());
     } catch (error) {
       console.error("Microphone permission denied:", error);
       setState((prev) => ({
@@ -106,6 +149,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         audioBlob: null,
       }
     }));
+    setAudioAnalysisResult(null);
   };
 
   const startRecording = () => {
@@ -130,26 +174,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Simulate processing delay
     setTimeout(() => {
-      const mockFeedback: FeedbackResult = {
-        score: Math.floor(Math.random() * 30) + 70, // 70-99
-        positive: "Great structure and confident delivery!",
-        improvement: "You said 'um' 5 times. Try replacing fillers with short pauses.",
-        xp: Math.floor(Math.random() * 10) + 8, // 8-17
-      };
+      import('@/lib/audioRecorder').then(({ analyzeAudio }) => {
+        // Create mock audio blob if not available
+        const audioBlob = state.recordingState.audioBlob || new Blob([], { type: 'audio/webm' });
+        
+        analyzeAudio(audioBlob).then(analysisResult => {
+          setAudioAnalysisResult(analysisResult);
+          
+          // Use analysis result to generate feedback
+          const mockFeedback: FeedbackResult = {
+            score: analysisResult.clarity,
+            positive: `Great job! ${analysisResult.improvement.general}`,
+            improvement: analysisResult.fillerWordCount > 0 
+              ? analysisResult.improvement.fillers 
+              : analysisResult.improvement.pace,
+            xp: Math.floor(analysisResult.clarity / 10) + 5, // 5-15 XP
+          };
 
-      // Store the current state to access for updating user
-      const updatedState = { ...state };
+          setState((currentState) => ({
+            ...currentState,
+            feedbackResult: mockFeedback,
+            isLoading: false,
+          }));
 
-      setState((currentState) => ({
-        ...currentState,
-        feedbackResult: mockFeedback,
-        isLoading: false,
-      }));
-
-      // Update user XP
-      updateUser({
-        xp: user.xp + mockFeedback.xp,
-        totalLearningTime: user.totalLearningTime + Math.ceil(updatedState.recordingState.duration / 60),
+          // Store the current state to access for updating user
+          const updatedState = { ...state };
+          
+          // Update user XP and learning time
+          updateUser({
+            xp: user.xp + mockFeedback.xp,
+            totalLearningTime: user.totalLearningTime + Math.ceil(updatedState.recordingState.duration / 60),
+          });
+          
+          // Mark lesson as completed if we're in a lesson
+          if (state.selectedCategory && state.selectedLesson) {
+            markLessonComplete(state.selectedCategory.id, state.selectedLesson.id);
+          }
+        });
       });
     }, 2000);
   };
@@ -178,7 +239,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateUser = (updates: Partial<User>) => {
-    setUser((prev) => ({ ...prev, ...updates }));
+    setUser((prev) => {
+      const updated = { ...prev, ...updates };
+      saveUserData(updated);
+      return updated;
+    });
+  };
+  
+  const markLessonComplete = (categoryId: string, lessonId: string) => {
+    // Save to local storage
+    saveCompletedLesson(categoryId, lessonId);
+    
+    // Update in-memory state
+    setCategories(currentCategories => 
+      currentCategories.map(category => {
+        if (category.id === categoryId) {
+          const updatedLessons = category.lessons.map(lesson => {
+            if (lesson.id === lessonId) {
+              return { ...lesson, isCompleted: true };
+            }
+            return lesson;
+          });
+          return { ...category, lessons: updatedLessons };
+        }
+        return category;
+      })
+    );
   };
 
   const value: AppContextProps = {
@@ -195,6 +281,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setFeedbackResult,
     getRandomLesson,
     updateUser,
+    markLessonComplete,
+    audioAnalysisResult
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

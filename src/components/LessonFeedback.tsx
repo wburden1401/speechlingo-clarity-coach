@@ -1,82 +1,136 @@
 
-import { useAppContext } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
-import { Award, CheckCircle, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useAppContext } from "@/contexts/AppContext";
+import { Progress } from "@/components/ui/progress";
+import { BadgeCheck, Clock, MicOff, MessageCircle, AlertCircle } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 
 export function LessonFeedback() {
-  const { state, endLesson, selectLesson, setActiveTab } = useAppContext();
+  const { state, endLesson, user, audioAnalysisResult } = useAppContext();
   const { feedbackResult } = state;
-  
-  if (!feedbackResult) return null;
-  
-  const handleContinue = () => {
-    // Here you would normally mark the lesson as complete
-    // Then either load the next lesson or go back to category view
+  const { toast } = useToast();
+
+  if (!feedbackResult) {
+    return null;
+  }
+
+  const handleFinish = () => {
+    toast({
+      title: "Practice Completed",
+      description: `You earned +${feedbackResult.xp} XP!`,
+      duration: 3000,
+    });
     endLesson();
   };
-  
-  const handleGoBack = () => {
+
+  const handleTryAgain = () => {
     endLesson();
-    selectLesson(null);
+    // Wait for animation to complete
+    setTimeout(() => {
+      const lessonElement = document.querySelector(".lesson-button");
+      if (lessonElement) {
+        (lessonElement as HTMLElement).click();
+      }
+    }, 300);
   };
-  
+
   return (
-    <div className="animate-fade-in p-4 bg-card rounded-xl border border-border shadow-sm">
-      <div className="flex flex-col items-center mb-6">
-        <div className={cn(
-          "w-24 h-24 rounded-full flex items-center justify-center mb-4",
-          feedbackResult.score >= 90 ? "bg-lingo-green/20" :
-          feedbackResult.score >= 70 ? "bg-lingo-blue/20" : "bg-lingo-orange/20"
-        )}>
-          <Award className={cn(
-            "w-12 h-12",
-            feedbackResult.score >= 90 ? "text-lingo-green" :
-            feedbackResult.score >= 70 ? "text-lingo-blue" : "text-lingo-orange"
-          )} />
+    <div className="flex flex-col animate-fade-in">
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">Your Performance</h2>
+          <span className="text-lg font-semibold">{feedbackResult.score}/100</span>
         </div>
+        <Progress value={feedbackResult.score} className="h-3 mb-2" />
         
-        <h3 className="text-xl font-bold">
-          {feedbackResult.score >= 90 ? "Excellent!" :
-           feedbackResult.score >= 70 ? "Good Job!" : "Nice Try!"}
-        </h3>
-        
-        <div className="flex items-center mt-2 mb-4">
-          <span className="text-2xl font-bold">
-            {feedbackResult.score}%
-          </span>
-          <span className="text-muted-foreground text-sm ml-2">
-            Score
-          </span>
-          <span className="ml-4 px-2 py-1 bg-lingo-blue/20 text-lingo-blue rounded text-sm">
-            +{feedbackResult.xp} XP
-          </span>
-        </div>
-        
-        <div className="w-full space-y-3">
-          <div className="flex p-3 bg-lingo-green/10 rounded-lg">
-            <CheckCircle className="w-5 h-5 text-lingo-green mr-2 flex-shrink-0" />
-            <p className="text-sm">{feedbackResult.positive}</p>
-          </div>
+        <div className="mt-4 space-y-4">
+          <Card className="p-3 bg-green-50 border-green-100">
+            <div className="flex">
+              <BadgeCheck className="h-5 w-5 text-green-600 mr-2 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-green-800">What went well</p>
+                <p className="text-sm text-green-700">{feedbackResult.positive}</p>
+              </div>
+            </div>
+          </Card>
           
-          <div className="flex p-3 bg-lingo-orange/10 rounded-lg">
-            <AlertCircle className="w-5 h-5 text-lingo-orange mr-2 flex-shrink-0" />
-            <p className="text-sm">{feedbackResult.improvement}</p>
+          <Card className="p-3 bg-amber-50 border-amber-100">
+            <div className="flex">
+              <AlertCircle className="h-5 w-5 text-amber-600 mr-2 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-amber-800">For improvement</p>
+                <p className="text-sm text-amber-700">{feedbackResult.improvement}</p>
+              </div>
+            </div>
+          </Card>
+          
+          {audioAnalysisResult && (
+            <>
+              <div className="mt-6">
+                <h3 className="font-medium mb-2">Detailed Analysis</h3>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-muted p-3 rounded-lg">
+                    <div className="flex items-center">
+                      <MessageCircle className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Pace</span>
+                    </div>
+                    <p className="font-medium">{audioAnalysisResult.paceWordsPerMinute} WPM</p>
+                    <Progress value={Math.min(100, (audioAnalysisResult.paceWordsPerMinute / 180) * 100)} className="h-1 mt-2" />
+                  </div>
+                  
+                  <div className="bg-muted p-3 rounded-lg">
+                    <div className="flex items-center">
+                      <MicOff className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Filler words</span>
+                    </div>
+                    <p className="font-medium">{audioAnalysisResult.fillerWordCount}</p>
+                    <Progress value={Math.max(0, 100 - audioAnalysisResult.fillerWordCount * 10)} className="h-1 mt-2" />
+                  </div>
+                  
+                  <div className="bg-muted p-3 rounded-lg">
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Speaking time</span>
+                    </div>
+                    <p className="font-medium">{audioAnalysisResult.speakingTime}s</p>
+                  </div>
+                  
+                  <div className="bg-muted p-3 rounded-lg">
+                    <div className="flex items-center">
+                      <BadgeCheck className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Clarity</span>
+                    </div>
+                    <p className="font-medium">{audioAnalysisResult.clarity}/100</p>
+                    <Progress value={audioAnalysisResult.clarity} className="h-1 mt-2" />
+                  </div>
+                </div>
+              </div>
+              
+              {audioAnalysisResult.transcript && (
+                <div className="mt-4">
+                  <h3 className="font-medium text-sm mb-2">Transcript</h3>
+                  <Card className="p-3 bg-muted/50">
+                    <p className="text-sm">{audioAnalysisResult.transcript}</p>
+                  </Card>
+                </div>
+              )}
+            </>
+          )}
+          
+          <div className="flex items-center justify-between space-x-3">
+            <p className="text-sm text-primary font-medium">+ {feedbackResult.xp} XP</p>
           </div>
         </div>
       </div>
-      
-      <div className="flex flex-col gap-3">
-        <Button onClick={handleContinue} className="bg-lingo-blue hover:bg-lingo-blue/90">
-          Continue to Next Lesson
+
+      <div className="flex gap-3">
+        <Button variant="outline" className="flex-1" onClick={handleTryAgain}>
+          Practice Again
         </Button>
-        
-        <Button 
-          onClick={handleGoBack}
-          variant="outline"
-          className="border-lingo-blue text-lingo-blue hover:bg-lingo-blue/10"
-        >
-          Go Back to Learn Dashboard
+        <Button className="flex-1 bg-lingo-green" onClick={handleFinish}>
+          Complete
         </Button>
       </div>
     </div>
