@@ -13,7 +13,7 @@ export function ProgressPage() {
   // Calculate XP needed for next level
   const baseXp = 100;
   const xpForNextLevel = baseXp * Math.pow(1.5, user.level);
-  const xpProgress = Math.min(100, (user.xp / xpForNextLevel) * 100);
+  const xpProgress = Math.min(100, Math.round((user.xp / xpForNextLevel) * 100));
   
   // Format learning time
   const formatTime = (minutes: number): string => {
