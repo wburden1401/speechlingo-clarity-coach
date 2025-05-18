@@ -7,18 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Mic, Flame, Book, Trophy, ArrowRight } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Onboarding() {
   const { user, updateUser } = useAppContext();
-  const [open, setOpen] = useState(!user.name || user.name === "Guest User");
+  const { isAuthenticated } = useAuth();
+  const [open, setOpen] = useState(isAuthenticated && (!user.dailyGoalMinutes || !user.reason));
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
-    name: user.name !== "Guest User" ? user.name : "",
-    goal: user.dailyGoalMinutes,
+    goal: user.dailyGoalMinutes || 10,
     reason: user.reason || "Improve public speaking"
   });
   
-  const totalSteps = 4;
+  const totalSteps = 3;
   
   const handleNext = () => {
     if (step < totalSteps - 1) {
@@ -26,7 +27,6 @@ export function Onboarding() {
     } else {
       // Save user data and close
       updateUser({
-        name: formData.name || "Friend",
         dailyGoalMinutes: formData.goal,
         reason: formData.reason
       });
@@ -40,7 +40,6 @@ export function Onboarding() {
   };
   
   const isNextDisabled = () => {
-    if (step === 0 && !formData.name) return true;
     return false;
   };
   
@@ -50,18 +49,12 @@ export function Onboarding() {
         return (
           <div className="space-y-4 text-center">
             <h2 className="text-2xl font-bold">Welcome to SpeechLingo!</h2>
-            <p className="text-muted-foreground">Let's get to know you better.</p>
+            <p className="text-muted-foreground">Let's set up your practice profile.</p>
             
-            <div className="py-4">
-              <label className="block text-sm font-medium mb-1">What's your name?</label>
-              <Input
-                name="name"
-                placeholder="Enter your name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="text-center"
-                autoFocus
-              />
+            <div className="py-4 flex justify-center">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                <Mic className="h-8 w-8 text-primary" />
+              </div>
             </div>
           </div>
         );
@@ -121,53 +114,13 @@ export function Onboarding() {
             </div>
           </div>
         );
-      
-      case 3:
-        return (
-          <div className="space-y-4 text-center">
-            <h2 className="text-xl font-bold">You're all set!</h2>
-            <p className="text-muted-foreground">Here's what you can do in SpeechLingo:</p>
-            
-            <div className="py-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-lingo-blue/20 flex items-center justify-center flex-shrink-0">
-                  <Book className="h-5 w-5 text-lingo-blue" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">Learn speaking skills</p>
-                  <p className="text-xs text-muted-foreground">Practice with guided exercises</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-lingo-green/20 flex items-center justify-center flex-shrink-0">
-                  <Mic className="h-5 w-5 text-lingo-green" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">Record practice sessions</p>
-                  <p className="text-xs text-muted-foreground">Get instant feedback on your speech</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-lingo-orange/20 flex items-center justify-center flex-shrink-0">
-                  <Flame className="h-5 w-5 text-lingo-orange" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">Build a daily streak</p>
-                  <p className="text-xs text-muted-foreground">Stay consistent with your practice</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
         
       default:
         return null;
     }
   };
   
-  if (!open) return null;
+  if (!isAuthenticated || !open) return null;
   
   return (
     <Dialog open={open} onOpenChange={setOpen}>

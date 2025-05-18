@@ -1,20 +1,14 @@
-
 export interface User {
   id: string;
   name: string;
   email: string;
-  avatar: string;
-  country: string;
-  language: string;
-  birthday: string;
-  occupation: string;
-  reason: string;
-  level: number;
   xp: number;
+  level: number;
   streak: number;
   totalLearningTime: number;
+  completedLessons: number;
   dailyGoalMinutes: number;
-  referrals: number;
+  reason?: string;
   createdAt: string;
 }
 
@@ -22,51 +16,18 @@ export interface Category {
   id: string;
   name: string;
   description: string;
-  icon: string;
-  color: string;
-  image: string;
+  imageUrl: string;
   requiredLevel: number;
   lessons: Lesson[];
 }
 
 export interface Lesson {
   id: string;
-  title: string;
+  name: string;
   description: string;
-  prompt: string;
-  focusArea: string;
-  durationSeconds: number;
+  content: string;
   level: number;
   isCompleted: boolean;
-}
-
-export interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  color: string;
-  isUnlocked: boolean;
-  progress: number;
-  maxProgress: number;
-}
-
-export interface Friend {
-  id: string;
-  name: string;
-  avatar: string;
-  level: number;
-  streak: number;
-  lastActive: string;
-}
-
-export interface ActivityItem {
-  id: string;
-  userId: string;
-  userName: string;
-  userAvatar: string;
-  action: string;
-  timestamp: string;
 }
 
 export interface FeedbackResult {
@@ -76,19 +37,17 @@ export interface FeedbackResult {
   xp: number;
 }
 
-export interface RecordingState {
-  isRecording: boolean;
-  duration: number;
-  audioBlob: Blob | null;
-}
-
 export interface AppState {
   activeTab: "home" | "learn" | "friends" | "progress" | "profile";
   selectedCategory: Category | null;
   selectedLesson: Lesson | null;
   isLessonActive: boolean;
   isRecordingPermissionGranted: boolean;
-  recordingState: RecordingState;
+  recordingState: {
+    isRecording: boolean;
+    duration: number;
+    audioBlob: Blob | null;
+  };
   feedbackResult: FeedbackResult | null;
   isLoading: boolean;
 }

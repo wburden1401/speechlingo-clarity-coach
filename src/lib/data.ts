@@ -1,23 +1,17 @@
-import { User, Category, Lesson, Achievement, Friend, ActivityItem } from "@/types";
+import { User, Category, Lesson } from "@/types";
 
-// Mock User Data
+// Mock user data
 export const mockUser: User = {
-  id: "user1",
-  name: "Alex Johnson",
-  email: "alex@example.com",
-  avatar: "/placeholder.svg",
-  country: "United States",
-  language: "English",
-  birthday: "1990-01-15",
-  occupation: "Product Manager",
-  reason: "Improve public speaking",
-  level: 3,
-  xp: 750,
-  streak: 7,
-  totalLearningTime: 128,
+  id: "user_1",
+  name: "Guest User",
+  email: "guest@example.com",
+  xp: 120,
+  level: 2,
+  streak: 3,
+  totalLearningTime: 45,
+  completedLessons: 5,
   dailyGoalMinutes: 10,
-  referrals: 2,
-  createdAt: "2023-05-15T10:30:00Z",
+  createdAt: new Date().toISOString(),
 };
 
 // Mock Categories and Lessons

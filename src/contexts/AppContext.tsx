@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AppState, Category, Lesson, FeedbackResult, User } from "@/types";
 import { mockUser, mockCategories } from "@/lib/data";
@@ -11,6 +10,7 @@ import {
   getCompletedLessons
 } from "@/lib/localStorage";
 import { AudioAnalysisResult } from "@/lib/audioRecorder";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AppContextProps {
   state: AppState;
@@ -42,7 +42,8 @@ export const useAppContext = () => {
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { toast } = useToast();
-  const [user, setUser] = useState<User>(mockUser);
+  const { currentUser } = useAuth();
+  const [user, setUser] = useState<User>(currentUser || mockUser);
   const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [audioAnalysisResult, setAudioAnalysisResult] = useState<AudioAnalysisResult | null>(null);
   const [state, setState] = useState<AppState>({
@@ -59,6 +60,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     feedbackResult: null,
     isLoading: false,
   });
+
+  // Update user when auth changes
+  useEffect(() => {
+    if (currentUser) {
+      setUser(currentUser);
+    }
+  }, [currentUser]);
 
   // Initialize state from local storage
   useEffect(() => {
