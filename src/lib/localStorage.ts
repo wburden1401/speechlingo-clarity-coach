@@ -8,13 +8,36 @@ const STORAGE_KEYS = {
   USER: "speechlingo-user",
   COMPLETED_LESSONS: "speechlingo-completed-lessons",
   LAST_ACTIVE: "speechlingo-last-active",
-  SETTINGS: "speechlingo-settings"
+  SETTINGS: "speechlingo-settings",
+  OFFLINE_RECORDINGS: "speechlingo-offline-recordings",
+  NOTIFICATION_PREFERENCES: "speechlingo-notifications",
+  PENDING_SYNCS: "speechlingo-pending-syncs",
+  NETWORK_STATUS: "speechlingo-network-status"
 };
 
 export type UserSettings = {
   dailyGoalMinutes: number;
   notifications: boolean;
   theme: "light" | "dark" | "system";
+  reminderTime: string; // Time of day for practice reminders (HH:MM format)
+  soundEffects: boolean;
+};
+
+export type NotificationPreferences = {
+  dailyReminders: boolean;
+  streakAlerts: boolean;
+  achievementAlerts: boolean;
+  friendActivity: boolean;
+};
+
+export type OfflineRecording = {
+  id: string;
+  blob: Blob;
+  lessonId: string | null;
+  categoryId: string | null;
+  timestamp: string;
+  duration: number;
+  pendingSync: boolean;
 };
 
 /**
@@ -52,6 +75,11 @@ export const saveCompletedLesson = (categoryId: string, lessonId: string): void 
   if (!completedLessons[categoryId].includes(lessonId)) {
     completedLessons[categoryId].push(lessonId);
     localStorage.setItem(STORAGE_KEYS.COMPLETED_LESSONS, JSON.stringify(completedLessons));
+    
+    // Add to pending sync queue if offline
+    if (!isOnline()) {
+      addPendingSync('completedLesson', { categoryId, lessonId });
+    }
   }
 };
 
@@ -124,7 +152,9 @@ export const getUserSettings = (): UserSettings => {
   const defaultSettings: UserSettings = {
     dailyGoalMinutes: 10,
     notifications: true,
-    theme: "light"
+    theme: "light",
+    reminderTime: "08:00",
+    soundEffects: true
   };
   
   if (!settings) return defaultSettings;
@@ -138,11 +168,128 @@ export const getUserSettings = (): UserSettings => {
 };
 
 /**
+ * Save notification preferences
+ */
+export const saveNotificationPreferences = (preferences: NotificationPreferences): void => {
+  localStorage.setItem(STORAGE_KEYS.NOTIFICATION_PREFERENCES, JSON.stringify(preferences));
+};
+
+/**
+ * Get notification preferences
+ */
+export const getNotificationPreferences = (): NotificationPreferences => {
+  const preferences = localStorage.getItem(STORAGE_KEYS.NOTIFICATION_PREFERENCES);
+  const defaultPreferences: NotificationPreferences = {
+    dailyReminders: true,
+    streakAlerts: true,
+    achievementAlerts: true,
+    friendActivity: false
+  };
+  
+  if (!preferences) return defaultPreferences;
+  
+  try {
+    return { ...defaultPreferences, ...JSON.parse(preferences) as Partial<NotificationPreferences> };
+  } catch (error) {
+    console.error("Failed to parse notification preferences:", error);
+    return defaultPreferences;
+  }
+};
+
+/**
+ * Save an offline recording
+ */
+export const saveOfflineRecording = (recording: OfflineRecording): void => {
+  const recordings = getOfflineRecordings();
+  recordings.push(recording);
+  localStorage.setItem(STORAGE_KEYS.OFFLINE_RECORDINGS, JSON.stringify(recordings));
+};
+
+/**
+ * Get all offline recordings
+ */
+export const getOfflineRecordings = (): OfflineRecording[] => {
+  const recordings = localStorage.getItem(STORAGE_KEYS.OFFLINE_RECORDINGS);
+  if (!recordings) return [];
+  
+  try {
+    return JSON.parse(recordings) as OfflineRecording[];
+  } catch (error) {
+    console.error("Failed to parse offline recordings:", error);
+    return [];
+  }
+};
+
+/**
+ * Remove an offline recording
+ */
+export const removeOfflineRecording = (id: string): void => {
+  const recordings = getOfflineRecordings().filter(r => r.id !== id);
+  localStorage.setItem(STORAGE_KEYS.OFFLINE_RECORDINGS, JSON.stringify(recordings));
+};
+
+/**
+ * Add a pending sync operation
+ */
+export const addPendingSync = (type: string, data: any): void => {
+  const pendingSyncs = getPendingSyncs();
+  pendingSyncs.push({
+    id: `sync_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+    type,
+    data,
+    timestamp: new Date().toISOString()
+  });
+  localStorage.setItem(STORAGE_KEYS.PENDING_SYNCS, JSON.stringify(pendingSyncs));
+};
+
+/**
+ * Get all pending sync operations
+ */
+export const getPendingSyncs = (): Array<{id: string, type: string, data: any, timestamp: string}> => {
+  const syncs = localStorage.getItem(STORAGE_KEYS.PENDING_SYNCS);
+  if (!syncs) return [];
+  
+  try {
+    return JSON.parse(syncs) as Array<{id: string, type: string, data: any, timestamp: string}>;
+  } catch (error) {
+    console.error("Failed to parse pending syncs:", error);
+    return [];
+  }
+};
+
+/**
+ * Remove a pending sync operation
+ */
+export const removePendingSync = (id: string): void => {
+  const syncs = getPendingSyncs().filter(s => s.id !== id);
+  localStorage.setItem(STORAGE_KEYS.PENDING_SYNCS, JSON.stringify(syncs));
+};
+
+/**
+ * Set the online/offline status
+ */
+export const setOnlineStatus = (online: boolean): void => {
+  localStorage.setItem(STORAGE_KEYS.NETWORK_STATUS, online.toString());
+};
+
+/**
+ * Check if app is online
+ */
+export const isOnline = (): boolean => {
+  const status = localStorage.getItem(STORAGE_KEYS.NETWORK_STATUS);
+  if (status === null) return navigator.onLine;
+  return status === 'true';
+};
+
+/**
  * Clear all stored data (for logout)
  */
 export const clearStoredData = (): void => {
   localStorage.removeItem(STORAGE_KEYS.USER);
   localStorage.removeItem(STORAGE_KEYS.COMPLETED_LESSONS);
-  // Keep last active date for analytics purposes
   localStorage.removeItem(STORAGE_KEYS.SETTINGS);
+  localStorage.removeItem(STORAGE_KEYS.OFFLINE_RECORDINGS);
+  localStorage.removeItem(STORAGE_KEYS.NOTIFICATION_PREFERENCES);
+  localStorage.removeItem(STORAGE_KEYS.PENDING_SYNCS);
+  // Keep last active date and network status for analytics purposes
 };

@@ -7,6 +7,7 @@ import { FriendsPage } from "@/pages/FriendsPage";
 import { ProgressPage } from "@/pages/ProgressPage";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { useAppContext } from "@/contexts/AppContext";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 // Main content component that renders the active tab
 const MainContent = () => {
@@ -35,6 +36,7 @@ const SpeechLingo = () => {
       <div className="min-h-screen bg-background pb-16">
         <MainContent />
         <BottomNav />
+        <OfflineIndicator />
       </div>
     </AppProvider>
   );

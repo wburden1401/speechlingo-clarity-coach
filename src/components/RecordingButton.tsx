@@ -3,11 +3,13 @@ import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { AudioRecorder, analyzeAudio } from "@/lib/audioRecorder";
 import { useAppContext } from "@/contexts/AppContext";
-import { Mic, Square, Loader } from "lucide-react";
+import { useNetwork } from "@/contexts/NetworkContext";
+import { Mic, Square, Loader, WifiOff } from "lucide-react";
 import { AudioWaveform } from "./AudioWaveform";
 import { RecordingTimer } from "./RecordingTimer";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { saveOfflineRecording } from "@/lib/localStorage";
 
 interface RecordingButtonProps {
   maxDuration?: number;
@@ -15,6 +17,7 @@ interface RecordingButtonProps {
 
 export function RecordingButton({ maxDuration }: RecordingButtonProps) {
   const { state, startRecording, stopRecording } = useAppContext();
+  const { isOnline } = useNetwork();
   const { toast } = useToast();
   const [seconds, setSeconds] = useState(0);
   const recorderRef = useRef<AudioRecorder | null>(null);
@@ -78,10 +81,31 @@ export function RecordingButton({ maxDuration }: RecordingButtonProps) {
   };
 
   const handleRecordingComplete = async (blob: Blob, duration: number) => {
-    // This would normally send the audio to the server for analysis
-    // For now, we'll just wait a bit and then trigger the feedback UI
+    // Save recording to state
     stopRecording();
-    // Analyze audio would happen on server side
+    
+    if (!isOnline) {
+      // Save recording for later sync
+      const offlineRecording = {
+        id: `recording_${Date.now()}`,
+        blob,
+        lessonId: state.selectedLesson?.id || null,
+        categoryId: state.selectedCategory?.id || null,
+        timestamp: new Date().toISOString(),
+        duration,
+        pendingSync: true
+      };
+      
+      saveOfflineRecording(offlineRecording);
+      
+      toast({
+        title: "Recording Saved Offline",
+        description: "Your recording will be analyzed when you're back online.",
+      });
+    }
+    
+    // Analyze audio would happen on server side in a real app
+    // For now we'll use the mock implementation
     await analyzeAudio(blob);
   };
 
@@ -93,6 +117,13 @@ export function RecordingButton({ maxDuration }: RecordingButtonProps) {
         seconds={seconds}
         totalSeconds={maxDuration}
       />
+      
+      {!isOnline && (
+        <div className="flex items-center gap-1 mt-1 text-amber-500 text-xs">
+          <WifiOff className="h-3 w-3" />
+          <span>Offline mode - recording will sync later</span>
+        </div>
+      )}
       
       <Button
         onClick={handleToggleRecording}
