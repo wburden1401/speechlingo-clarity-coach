@@ -1,3 +1,4 @@
+
 interface AudioRecorderOptions {
   onDataAvailable?: (blob: Blob) => void;
   onTimeUpdate?: (time: number) => void;
@@ -18,7 +19,7 @@ export class AudioRecorder {
   private audioContext: AudioContext | null = null;
   private analyzer: AnalyserNode | null = null;
   private audioVolumes: number[] = [];
-  private volumeUpdateInterval: number | null = null;
+  private volumeUpdateInterval: ReturnType<typeof setInterval> | null = null;
 
   // Callback functions
   private onDataAvailable: ((blob: Blob) => void) | undefined;
