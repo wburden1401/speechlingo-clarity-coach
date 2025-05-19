@@ -1,13 +1,19 @@
 
 import { getUserSettings, getNotificationPreferences, NotificationPreferences } from "@/lib/localStorage";
 
+// Define the NotificationAction interface
+interface NotificationAction {
+  action: string;
+  title: string;
+  icon?: string;
+}
+
 interface NotificationOptions {
   title: string;
   body: string;
   icon?: string;
   tag?: string;
   requireInteraction?: boolean;
-  actions?: NotificationAction[];
 }
 
 export type NotificationType = 'streakReminder' | 'practiceReminder' | 'achievement' | 'friendActivity';
@@ -71,8 +77,7 @@ export const sendNotification = (type: NotificationType, options: NotificationOp
         body: options.body,
         icon: options.icon || '/favicon.ico',
         tag: options.tag,
-        requireInteraction: options.requireInteraction || false,
-        actions: options.actions
+        requireInteraction: options.requireInteraction || false
       });
     } catch (error) {
       console.error('Failed to send notification:', error);
