@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -10,24 +11,32 @@ export interface User {
   dailyGoalMinutes: number;
   reason?: string;
   createdAt: string;
+  referrals: number;
 }
 
 export interface Category {
   id: string;
   name: string;
   description: string;
-  imageUrl: string;
+  imageUrl?: string;
+  image?: string;
   requiredLevel: number;
   lessons: Lesson[];
+  color: string;
+  icon: string;
 }
 
 export interface Lesson {
   id: string;
-  name: string;
+  name?: string;
+  title?: string;  // Added title as an optional property
   description: string;
-  content: string;
+  content?: string;
   level: number;
   isCompleted: boolean;
+  durationSeconds: number;
+  focusArea: string;
+  prompt: string;
 }
 
 export interface FeedbackResult {
@@ -50,4 +59,33 @@ export interface AppState {
   };
   feedbackResult: FeedbackResult | null;
   isLoading: boolean;
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  isUnlocked: boolean;
+  progress: number;
+  maxProgress: number;
+}
+
+export interface Friend {
+  id: string;
+  name: string;
+  avatar: string;
+  level: number;
+  streak: number;
+  lastActive: string;
+}
+
+export interface ActivityItem {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  action: string;
+  timestamp: string;
 }
