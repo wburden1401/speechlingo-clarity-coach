@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { AudioRecorder, analyzeAudio } from "@/lib/audioRecorder";
@@ -119,7 +118,7 @@ export function RecordingButton({ maxDuration }: RecordingButtonProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <AudioWaveform isActive={isRecording} volume={volume} />
+      <AudioWaveform isActive={isRecording} />
       
       <RecordingTimer 
         seconds={seconds}

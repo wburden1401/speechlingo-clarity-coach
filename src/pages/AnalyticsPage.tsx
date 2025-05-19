@@ -9,7 +9,7 @@ import { PerformanceHistory } from "@/components/analytics/PerformanceHistory";
 import { FillerWordAnalysis } from "@/components/analytics/FillerWordAnalysis";
 import { PracticeStats } from "@/components/analytics/PracticeStats"; 
 import { PracticeRecommendations } from "@/components/analytics/PracticeRecommendations";
-import { ChartLineUp, BarChart, Clock, TrendingUp, Calendar } from "lucide-react";
+import { ChartLine, BarChart, Clock, TrendingUp, Calendar } from "lucide-react";
 
 export function AnalyticsPage() {
   const { user, audioAnalysisResult } = useAppContext();
@@ -50,7 +50,7 @@ export function AnalyticsPage() {
         <Tabs defaultValue="performance" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="performance" className="flex items-center gap-2">
-              <ChartLineUp className="h-4 w-4" />
+              <ChartLine className="h-4 w-4" />
               <span>Performance</span>
             </TabsTrigger>
             <TabsTrigger value="practice" className="flex items-center gap-2">

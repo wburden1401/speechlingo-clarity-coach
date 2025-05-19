@@ -11,7 +11,7 @@ export class AudioRecorder {
   private mediaRecorder: MediaRecorder | null = null;
   private audioChunks: Blob[] = [];
   private startTime: number = 0;
-  private timerInterval: number | null = null;
+  private timer: ReturnType<typeof setTimeout> | null = null;
   private timeElapsed: number = 0;
   private maxDuration: number = 0;
   private stream: MediaStream | null = null;
@@ -55,7 +55,7 @@ export class AudioRecorder {
       
       // Start timer
       if (this.onTimeUpdate) {
-        this.timerInterval = window.setInterval(() => {
+        this.timer = window.setInterval(() => {
           this.timeElapsed = Math.floor((Date.now() - this.startTime) / 1000);
           this.onTimeUpdate?.(this.timeElapsed);
           
@@ -79,9 +79,9 @@ export class AudioRecorder {
     }
     
     // Clear timer
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
-      this.timerInterval = null;
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
     }
     
     // Clear volume update interval
