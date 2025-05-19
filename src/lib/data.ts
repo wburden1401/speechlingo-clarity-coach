@@ -1,4 +1,4 @@
-import { User, Category, Lesson } from "@/types";
+import { User, Category, Lesson, Achievement, Friend, ActivityItem } from "@/types";
 
 // Mock user data
 export const mockUser: User = {
@@ -12,6 +12,7 @@ export const mockUser: User = {
   completedLessons: 5,
   dailyGoalMinutes: 10,
   createdAt: new Date().toISOString(),
+  referrals: 0, // Add missing referrals property
 };
 
 // Mock Categories and Lessons
