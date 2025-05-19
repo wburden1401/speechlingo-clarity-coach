@@ -6,6 +6,7 @@ import { LearnPage } from "@/pages/LearnPage";
 import { FriendsPage } from "@/pages/FriendsPage";
 import { ProgressPage } from "@/pages/ProgressPage";
 import { ProfilePage } from "@/pages/ProfilePage";
+import { AnalyticsPage } from "@/pages/AnalyticsPage";
 import { useAppContext } from "@/contexts/AppContext";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 
@@ -22,6 +23,8 @@ const MainContent = () => {
       return <FriendsPage />;
     case "progress":
       return <ProgressPage />;
+    case "analytics":
+      return <AnalyticsPage />;
     case "profile":
       return <ProfilePage />;
     default:

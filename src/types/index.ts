@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -47,7 +46,7 @@ export interface FeedbackResult {
 }
 
 export interface AppState {
-  activeTab: "home" | "learn" | "friends" | "progress" | "profile";
+  activeTab: "home" | "learn" | "friends" | "progress" | "analytics" | "profile";
   selectedCategory: Category | null;
   selectedLesson: Lesson | null;
   isLessonActive: boolean;

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { AppState, Category, Lesson, FeedbackResult, User } from "@/types";
 import { mockUser, mockCategories } from "@/lib/data";
@@ -11,6 +12,8 @@ import {
 } from "@/lib/localStorage";
 import { AudioAnalysisResult } from "@/lib/audioRecorder";
 import { useAuth } from "@/contexts/AuthContext";
+import { Achievement, checkForAchievements } from "@/lib/achievementsService";
+import { AchievementPopup } from "@/components/achievement/AchievementPopup";
 
 interface AppContextProps {
   state: AppState;
@@ -46,6 +49,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [user, setUser] = useState<User>(currentUser || mockUser);
   const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [audioAnalysisResult, setAudioAnalysisResult] = useState<AudioAnalysisResult | null>(null);
+  const [achievementPopup, setAchievementPopup] = useState<Achievement | null>(null);
   const [state, setState] = useState<AppState>({
     activeTab: "home",
     selectedCategory: null,
@@ -75,6 +79,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Update streak based on last login
       const userWithUpdatedStreak = updateStreak(storedUser);
       setUser(userWithUpdatedStreak);
+      
+      // Check for streak-based achievements
+      if (userWithUpdatedStreak.streak > storedUser.streak) {
+        const unlockedAchievement = checkForAchievements(userWithUpdatedStreak, "streak_update");
+        if (unlockedAchievement) {
+          setAchievementPopup(unlockedAchievement);
+        }
+      }
     } else {
       // First time user - save mock data to local storage
       saveUserData(mockUser);
@@ -217,7 +229,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           // Mark lesson as completed if we're in a lesson
           if (state.selectedCategory && state.selectedLesson) {
             markLessonComplete(state.selectedCategory.id, state.selectedLesson.id);
+            
+            // Check for achievements
+            const unlockedAchievement = checkForAchievements(user, "lesson_complete", {
+              clarity: analysisResult.clarity,
+              fillerWordCount: analysisResult.fillerWordCount
+            });
+            
+            if (unlockedAchievement) {
+              setAchievementPopup(unlockedAchievement);
+              
+              // Add XP reward
+              updateUser({
+                xp: user.xp + unlockedAchievement.xpReward
+              });
+            }
           }
+          
+          // Check for practice time achievements
+          checkForAchievements(user, "practice_time_update");
         });
       });
     }, 2000);
@@ -268,6 +298,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
             return lesson;
           });
+          
+          // Check if all lessons in the category are complete
+          const allLessonsComplete = updatedLessons.every(lesson => lesson.isCompleted);
+          
+          if (allLessonsComplete) {
+            // Check for category completion achievement
+            setTimeout(() => {
+              const unlockedAchievement = checkForAchievements(user, "category_complete");
+              if (unlockedAchievement) {
+                setAchievementPopup(unlockedAchievement);
+              }
+            }, 500);
+          }
+          
           return { ...category, lessons: updatedLessons };
         }
         return category;
@@ -293,5 +337,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     audioAnalysisResult
   };
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>
+      {children}
+      {achievementPopup && (
+        <AchievementPopup
+          title={achievementPopup.title}
+          description={achievementPopup.description}
+          icon={achievementPopup.icon}
+          color={achievementPopup.color}
+          xp={achievementPopup.xpReward}
+          onComplete={() => setAchievementPopup(null)}
+        />
+      )}
+    </AppContext.Provider>
+  );
 };

@@ -18,9 +18,30 @@ import { setupInitialNotifications } from "@/lib/notificationService";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Setup notifications when app starts
+  // Setup notifications and analytics when app starts
   useEffect(() => {
+    // Setup notifications
     setupInitialNotifications();
+    
+    // Setup analytics tracking
+    const trackPageView = () => {
+      console.log("Analytics: Page viewed", window.location.pathname);
+      // In a real app, you would send this to your analytics service
+    };
+    
+    // Track initial page view
+    trackPageView();
+    
+    // Add listener for route changes
+    const handleRouteChange = () => {
+      trackPageView();
+    };
+    
+    window.addEventListener("popstate", handleRouteChange);
+    
+    return () => {
+      window.removeEventListener("popstate", handleRouteChange);
+    };
   }, []);
   
   return (

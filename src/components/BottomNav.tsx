@@ -1,40 +1,71 @@
 
-import { Home, BookOpen, Users, BarChart2, User } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useAppContext } from "@/contexts/AppContext";
+import { Home, BookOpen, Users, BarChart, LineChart, User } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface NavItem {
+  id: string;
+  icon: React.ElementType;
+  label: string;
+}
 
 export function BottomNav() {
   const { state, setActiveTab } = useAppContext();
-  
-  const navItems = [
-    { id: "home", label: "Home", icon: Home },
-    { id: "learn", label: "Learn", icon: BookOpen },
-    { id: "friends", label: "Friends", icon: Users },
-    { id: "progress", label: "Progress", icon: BarChart2 },
-    { id: "profile", label: "Profile", icon: User }
-  ] as const;
+  const { activeTab } = state;
 
+  const navItems: NavItem[] = [
+    {
+      id: "home",
+      icon: Home,
+      label: "Home"
+    },
+    {
+      id: "learn",
+      icon: BookOpen,
+      label: "Learn"
+    },
+    {
+      id: "friends",
+      icon: Users,
+      label: "Friends"
+    },
+    {
+      id: "progress",
+      icon: BarChart,
+      label: "Progress"
+    },
+    {
+      id: "analytics",
+      icon: LineChart,
+      label: "Analytics"
+    },
+    {
+      id: "profile",
+      icon: User,
+      label: "Profile"
+    }
+  ];
+  
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border sm:floating-nav">
-      <div className="flex justify-around items-center">
-        {navItems.map((item) => (
+    <div className="fixed bottom-0 left-0 right-0 border-t bg-background z-30">
+      <div className="flex items-center justify-between max-w-md mx-auto">
+        {navItems.map(item => (
           <button
             key={item.id}
-            onClick={() => setActiveTab(item.id)}
             className={cn(
-              "flex flex-col items-center py-2 px-4 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50",
-              state.activeTab === item.id
+              "flex flex-1 flex-col items-center justify-center h-16 text-xs",
+              activeTab === item.id
                 ? "text-primary"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground"
             )}
+            onClick={() => setActiveTab(item.id as any)}
             aria-label={item.label}
-            aria-current={state.activeTab === item.id ? "page" : undefined}
           >
-            <item.icon className="h-5 w-5" />
-            <span className="text-xs mt-1">{item.label}</span>
+            <item.icon className="h-5 w-5 mb-1" />
+            <span>{item.label}</span>
           </button>
         ))}
       </div>
-    </nav>
+    </div>
   );
 }

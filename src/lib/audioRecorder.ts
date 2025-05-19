@@ -1,10 +1,10 @@
-
 interface AudioRecorderOptions {
   onDataAvailable?: (blob: Blob) => void;
   onTimeUpdate?: (time: number) => void;
   onComplete?: (blob: Blob, duration: number) => void;
   onError?: (error: Error) => void;
   maxDuration?: number; // in seconds
+  onVolumeUpdate?: (volume: number) => void; // Add this new option
 }
 
 export class AudioRecorder {
@@ -18,12 +18,14 @@ export class AudioRecorder {
   private audioContext: AudioContext | null = null;
   private analyzer: AnalyserNode | null = null;
   private audioVolumes: number[] = [];
+  private volumeUpdateInterval: number | null = null;
 
   // Callback functions
   private onDataAvailable: ((blob: Blob) => void) | undefined;
   private onTimeUpdate: ((time: number) => void) | undefined;
   private onComplete: ((blob: Blob, duration: number) => void) | undefined;
   private onError: ((error: Error) => void) | undefined;
+  private onVolumeUpdate: ((volume: number) => void) | undefined;
 
   constructor(options?: AudioRecorderOptions) {
     this.onDataAvailable = options?.onDataAvailable;
@@ -31,6 +33,7 @@ export class AudioRecorder {
     this.onComplete = options?.onComplete;
     this.onError = options?.onError;
     this.maxDuration = options?.maxDuration || 0;
+    this.onVolumeUpdate = options?.onVolumeUpdate;
   }
 
   public async start(): Promise<void> {
@@ -79,6 +82,12 @@ export class AudioRecorder {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
       this.timerInterval = null;
+    }
+    
+    // Clear volume update interval
+    if (this.volumeUpdateInterval) {
+      clearInterval(this.volumeUpdateInterval);
+      this.volumeUpdateInterval = null;
     }
     
     // Stop all tracks in the stream
@@ -154,11 +163,19 @@ export class AudioRecorder {
         // Get average volume (0-100)
         const averageVolume = sum / bufferLength;
         this.audioVolumes.push(averageVolume);
+        
+        // Call the onVolumeUpdate callback if provided
+        if (this.onVolumeUpdate) {
+          this.onVolumeUpdate(averageVolume);
+        }
       }, 300);
+      
+      this.volumeUpdateInterval = analyzeInterval;
 
       // Clear interval when recording stops
       this.mediaRecorder?.addEventListener('stop', () => {
         clearInterval(analyzeInterval);
+        this.volumeUpdateInterval = null;
       });
     } catch (error) {
       console.error('Error setting up audio analysis:', error);

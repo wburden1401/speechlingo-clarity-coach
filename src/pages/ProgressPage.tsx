@@ -3,12 +3,13 @@ import { useAppContext } from "@/contexts/AppContext";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mockAchievements } from "@/lib/data";
+import { getUserAchievementProgress } from "@/lib/achievementsService";
 import { Award, Clock, Users, Flame, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function ProgressPage() {
   const { user } = useAppContext();
+  const achievements = getUserAchievementProgress(user);
   
   // Calculate XP needed for next level
   const baseXp = 100;
@@ -68,7 +69,7 @@ export function ProgressPage() {
               <Trophy className="h-6 w-6 text-lingo-green" />
             </div>
             <span className="text-xl font-bold">
-              {mockAchievements.filter(a => a.isUnlocked).length}
+              {achievements.filter(a => a.isUnlocked).length}
             </span>
             <span className="text-xs text-muted-foreground">Achievements</span>
           </Card>
@@ -86,7 +87,7 @@ export function ProgressPage() {
       <div className="px-4">
         <h2 className="font-semibold mb-3">Achievements</h2>
         <div className="space-y-3">
-          {mockAchievements.map((achievement) => (
+          {achievements.map((achievement) => (
             <Card
               key={achievement.id}
               className={cn(
