@@ -56,15 +56,23 @@ export class AudioRecorder {
       
       // Start timer
       if (this.onTimeUpdate) {
-        this.timer = window.setInterval(() => {
-          this.timeElapsed = Math.floor((Date.now() - this.startTime) / 1000);
-          this.onTimeUpdate?.(this.timeElapsed);
-          
-          // Auto-stop if max duration is reached
-          if (this.maxDuration > 0 && this.timeElapsed >= this.maxDuration) {
-            this.stop();
-          }
-        }, 100);
+        this.timer = setTimeout(() => {
+          const updateTimer = () => {
+            this.timeElapsed = Math.floor((Date.now() - this.startTime) / 1000);
+            this.onTimeUpdate?.(this.timeElapsed);
+            
+            // Auto-stop if max duration is reached
+            if (this.maxDuration > 0 && this.timeElapsed >= this.maxDuration) {
+              this.stop();
+            }
+            
+            // Continue the timer as long as we're recording
+            if (this.mediaRecorder && this.mediaRecorder.state === "recording") {
+              this.timer = setTimeout(updateTimer, 100);
+            }
+          };
+          updateTimer();
+        }, 100) as ReturnType<typeof setTimeout>;
       }
     } catch (error) {
       if (this.onError) {
@@ -149,9 +157,8 @@ export class AudioRecorder {
       const dataArray = new Uint8Array(bufferLength);
 
       // Sample audio levels at intervals
-      const analyzeInterval = setInterval(() => {
+      const analyzeAudio = () => {
         if (!this.analyzer) {
-          clearInterval(analyzeInterval);
           return;
         }
 
@@ -169,14 +176,17 @@ export class AudioRecorder {
         if (this.onVolumeUpdate) {
           this.onVolumeUpdate(averageVolume);
         }
-      }, 300);
+      };
       
-      this.volumeUpdateInterval = analyzeInterval;
-
+      // Set up interval to regularly analyze the audio
+      this.volumeUpdateInterval = setInterval(analyzeAudio, 300);
+      
       // Clear interval when recording stops
       this.mediaRecorder?.addEventListener('stop', () => {
-        clearInterval(analyzeInterval);
-        this.volumeUpdateInterval = null;
+        if (this.volumeUpdateInterval) {
+          clearInterval(this.volumeUpdateInterval);
+          this.volumeUpdateInterval = null;
+        }
       });
     } catch (error) {
       console.error('Error setting up audio analysis:', error);
