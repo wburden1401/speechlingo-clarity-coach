@@ -1,4 +1,3 @@
-
 import { useAppContext } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,7 +6,7 @@ import { Share, UserPlus, Flame, Award } from "lucide-react";
 import { mockFriends, mockActivity } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export function FriendsPage() {
+function FriendsPage() {
   return (
     <div className="space-y-6 pt-6 pb-24">
       <div className="px-4 mb-4">
@@ -91,3 +90,5 @@ export function FriendsPage() {
     </div>
   );
 }
+
+export default FriendsPage;

@@ -1,4 +1,3 @@
-
 import { useAppContext } from "@/contexts/AppContext";
 import { ArrowLeft, Play, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { RecordingButton } from "@/components/RecordingButton";
 import { LessonFeedback } from "@/components/LessonFeedback";
 import { Card } from "@/components/ui/card";
 
-export function LearnPage() {
+function LearnPage() {
   const { state, categories, user, selectCategory, selectLesson, startLesson } = useAppContext();
   const { selectedCategory, selectedLesson, isLessonActive, feedbackResult } = state;
 
@@ -192,3 +191,5 @@ export function LearnPage() {
     </div>
   );
 }
+
+export default LearnPage;

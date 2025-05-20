@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,7 +7,7 @@ import { Settings, LogOut, User, Award, Clock, Zap, Flame } from "lucide-react";
 import { AppSettings } from "@/components/settings/AppSettings";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-export function ProfilePage() {
+function ProfilePage() {
   const { user } = useAppContext();
   const { logout } = useAuth();
   const [showSettings, setShowSettings] = useState(false);
@@ -96,3 +95,5 @@ export function ProfilePage() {
     </div>
   );
 }
+
+export default ProfilePage;

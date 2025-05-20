@@ -1,4 +1,3 @@
-
 import { useAppContext } from "@/contexts/AppContext";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -7,7 +6,7 @@ import { getUserAchievementProgress } from "@/lib/achievementsService";
 import { Award, Clock, Users, Flame, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function ProgressPage() {
+function ProgressPage() {
   const { user } = useAppContext();
   const achievements = getUserAchievementProgress(user);
   
@@ -125,3 +124,5 @@ export function ProgressPage() {
     </div>
   );
 }
+
+export default ProgressPage;

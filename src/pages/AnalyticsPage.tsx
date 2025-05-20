@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAppContext } from "@/contexts/AppContext";
 import { Card } from "@/components/ui/card";
@@ -11,7 +10,7 @@ import { PracticeStats } from "@/components/analytics/PracticeStats";
 import { PracticeRecommendations } from "@/components/analytics/PracticeRecommendations";
 import { ChartLine, BarChart, Clock, TrendingUp, Calendar } from "lucide-react";
 
-export function AnalyticsPage() {
+function AnalyticsPage() {
   const { user, audioAnalysisResult } = useAppContext();
   const [timeRange, setTimeRange] = useState<"week" | "month" | "all">("week");
   
@@ -73,3 +72,5 @@ export function AnalyticsPage() {
     </div>
   );
 }
+
+export default AnalyticsPage;
