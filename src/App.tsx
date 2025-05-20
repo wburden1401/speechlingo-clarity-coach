@@ -15,6 +15,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useEffect } from "react";
 import { setupInitialNotifications } from "@/lib/notificationService";
 
+// Create a new Query Client instance
 const queryClient = new QueryClient();
 
 const App = () => {

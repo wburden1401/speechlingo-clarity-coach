@@ -1,35 +1,33 @@
 
 import { AppProvider } from "@/contexts/AppContext";
 import { BottomNav } from "@/components/BottomNav";
-import { HomePage } from "@/pages/HomePage";
-import { LearnPage } from "@/pages/LearnPage";
-import { FriendsPage } from "@/pages/FriendsPage";
-import { ProgressPage } from "@/pages/ProgressPage";
-import { ProfilePage } from "@/pages/ProfilePage";
-import { AnalyticsPage } from "@/pages/AnalyticsPage";
-import { useAppContext } from "@/contexts/AppContext";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { lazy, Suspense } from "react";
+
+// Lazy load pages to prevent potential circular dependencies
+const HomePage = lazy(() => import("@/pages/HomePage"));
+const LearnPage = lazy(() => import("@/pages/LearnPage")); 
+const FriendsPage = lazy(() => import("@/pages/FriendsPage"));
+const ProgressPage = lazy(() => import("@/pages/ProgressPage"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const AnalyticsPage = lazy(() => import("@/pages/AnalyticsPage"));
+
+import { useAppContext } from "@/contexts/AppContext";
 
 // Main content component that renders the active tab
 const MainContent = () => {
   const { state } = useAppContext();
   
-  switch (state.activeTab) {
-    case "home":
-      return <HomePage />;
-    case "learn":
-      return <LearnPage />;
-    case "friends":
-      return <FriendsPage />;
-    case "progress":
-      return <ProgressPage />;
-    case "analytics":
-      return <AnalyticsPage />;
-    case "profile":
-      return <ProfilePage />;
-    default:
-      return <HomePage />;
-  }
+  return (
+    <Suspense fallback={<div className="p-4">Loading...</div>}>
+      {state.activeTab === "home" && <HomePage />}
+      {state.activeTab === "learn" && <LearnPage />}
+      {state.activeTab === "friends" && <FriendsPage />}
+      {state.activeTab === "progress" && <ProgressPage />}
+      {state.activeTab === "analytics" && <AnalyticsPage />}
+      {state.activeTab === "profile" && <ProfilePage />}
+    </Suspense>
+  );
 };
 
 // App container with context

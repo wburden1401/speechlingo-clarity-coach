@@ -5,7 +5,7 @@ import { DailyGoal } from "@/components/DailyGoal";
 import { QuoteCard } from "@/components/QuoteCard";
 import { QuickLessonButton } from "@/components/QuickLessonButton";
 
-export function HomePage() {
+function HomePage() {
   const { user } = useAppContext();
 
   return (
@@ -29,3 +29,5 @@ export function HomePage() {
     </div>
   );
 }
+
+export default HomePage;
