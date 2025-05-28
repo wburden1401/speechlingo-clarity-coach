@@ -55,6 +55,16 @@ const useAppInitialization = () => {
   }, []);
 };
 
+// Protected content that needs AppProvider
+const ProtectedContent = () => {
+  return (
+    <AppProvider>
+      <Onboarding />
+      <Index />
+    </AppProvider>
+  );
+};
+
 // Main app routes component
 const AppRoutes = () => {
   useAppInitialization();
@@ -65,9 +75,7 @@ const AppRoutes = () => {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/" element={
           <ProtectedRoute>
-            <AppProvider>
-              <Index />
-            </AppProvider>
+            <ProtectedContent />
           </ProtectedRoute>
         } />
         <Route path="*" element={<NotFound />} />
@@ -82,7 +90,6 @@ const App = () => {
       <TooltipProvider>
         <AuthProvider>
           <NetworkProvider>
-            <Onboarding />
             <AppRoutes />
             <Toaster />
             <Sonner />
