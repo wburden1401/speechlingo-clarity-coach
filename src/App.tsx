@@ -17,18 +17,26 @@ import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
 
 // Create Query Client outside component to prevent recreation
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
-const App = () => {
-  // Setup notifications and analytics when app starts
+// App initialization hook
+const useAppInitialization = () => {
   useEffect(() => {
+    console.log("App initializing...");
+    
     // Setup notifications
     setupInitialNotifications();
     
     // Setup analytics tracking
     const trackPageView = () => {
       console.log("Analytics: Page viewed", window.location.pathname);
-      // In a real app, you would send this to your analytics service
     };
     
     // Track initial page view
@@ -45,35 +53,43 @@ const App = () => {
       window.removeEventListener("popstate", handleRouteChange);
     };
   }, []);
+};
+
+// Main app routes component
+const AppRoutes = () => {
+  useAppInitialization();
   
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <AuthProvider>
-            <NetworkProvider>
-              <AppProvider>
-                <Onboarding />
-                <BrowserRouter>
-                  <Routes>
-                    <Route path="/auth" element={<AuthPage />} />
-                    <Route path="/" element={
-                      <ProtectedRoute>
-                        <Index />
-                      </ProtectedRoute>
-                    } />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </BrowserRouter>
-                <Toaster />
-                <Sonner />
-              </AppProvider>
-            </NetworkProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </React.StrictMode>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <AppProvider>
+              <Index />
+            </AppProvider>
+          </ProtectedRoute>
+        } />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <NetworkProvider>
+            <Onboarding />
+            <AppRoutes />
+            <Toaster />
+            <Sonner />
+          </NetworkProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 
